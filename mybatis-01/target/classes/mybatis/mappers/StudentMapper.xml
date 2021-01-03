@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.staticzz.dao.StudentDao">
+
+    <!--按照结果进行嵌套处理-->
+
+    <select id="students2" resultMap="s_t_1">
+
+    select s.id ,s.name ,s.gender ,t.id tid,t.name tname
+
+    from student s,teacher t where s.tid=t.id;
+
+    </select>
+
+   <resultMap id="s_t_1" type="Student">
+       <result property="id" column="id"/>
+       <result property="name" column="name"/>
+       <result property="gender" column="gender"/>
+       <association property="teacher" javaType="Teacher">
+           <result property="id" column="tid"/>
+           <result property="name" column="tname"/>
+       </association>
+   </resultMap>
+
+
+
+
+
+
+    <!--按照查询进行嵌套处理-->
+    <!--查询所有学生,要求携带老师信息,所有结果对象不能为单一的-->
+    <select id="students" resultMap="s_t">
+        select * from student s,teacher t where s.tid=t.id;
+    </select>
+
+    <!--通过resultMap惊醒结果映射-->
+    <resultMap id="s_t" type="Student" >
+
+        <!--通过association,关联老师这个复杂类型,把学生表中的tid作为参数,select携带出去,再下一次查询时使用-->
+        <association property="teacher"  column="tid"  javaType="Teacher"  select="teacher"/>
+    </resultMap>
+
+    <!--通过select携带的参数查询老师-->
+    <select id="teacher" resultType="Teacher">
+       select * from teacher where id=#{tid}
+    </select>
+
+</mapper>
